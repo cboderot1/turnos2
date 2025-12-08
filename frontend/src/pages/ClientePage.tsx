@@ -13,6 +13,11 @@ export function ClientePage() {
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [error, setError] = useState('')
 
+  const cardClass = 'bg-slate-900/80 border border-slate-800 rounded-xl p-6 shadow-xl backdrop-blur'
+  const buttonBase =
+    'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
+  const primaryButton = `${buttonBase} bg-emerald-500 text-emerald-950 hover:bg-emerald-400 focus-visible:outline-emerald-400`
+
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
@@ -26,7 +31,7 @@ export function ClientePage() {
 
   return (
     <section id="cliente" className="mx-auto max-w-5xl px-4 py-12">
-      <div className="card">
+      <div className={cardClass}>
         <header className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm uppercase tracking-wide text-emerald-400">Solicitar turno</p>
@@ -91,7 +96,7 @@ export function ClientePage() {
             </select>
           </label>
           <div className="md:col-span-2 flex items-center gap-4">
-            <button className="btn-primary" type="submit">
+            <button className={primaryButton} type="submit">
               Solicitar turno
             </button>
             {error && <span className="text-sm text-amber-400">{error}</span>}
