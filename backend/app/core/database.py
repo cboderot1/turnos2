@@ -6,7 +6,7 @@ import os
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_USER = os.getenv("DB_USER", "turnos_user")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "turnos_password")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "Arduino2025!")
 DB_NAME = os.getenv("DB_NAME", "turnos_db")
 
 SQLALCHEMY_DATABASE_URL = (
