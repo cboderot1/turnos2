@@ -19,8 +19,8 @@ export function AdminPage() {
         axios.get<Ticket[]>('/api/reports'),
         axios.get<{ attending?: AgentState[] }>('/api/tickets/queue'),
       ])
-      setReport(reportRes.data ?? [])
-      setAgents(queueRes.data?.attending ?? [])
+      setReport(Array.isArray(reportRes.data) ? reportRes.data : [])
+      setAgents(Array.isArray(queueRes.data?.attending) ? queueRes.data.attending : [])
     } catch (error) {
       console.error('Error loading admin data', error)
       setReport([])
