@@ -14,12 +14,18 @@ export function AdminPage() {
   const badgeBase = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide'
 
   const load = async () => {
-    const [reportRes, queueRes] = await Promise.all([
-      axios.get<Ticket[]>('/api/reports'),
-      axios.get<{ attending: AgentState[] }>('/api/tickets/queue'),
-    ])
-    setReport(reportRes.data)
-    setAgents(queueRes.data.attending)
+    try {
+      const [reportRes, queueRes] = await Promise.all([
+        axios.get<Ticket[]>('/api/reports'),
+        axios.get<{ attending?: AgentState[] }>('/api/tickets/queue'),
+      ])
+      setReport(reportRes.data ?? [])
+      setAgents(queueRes.data?.attending ?? [])
+    } catch (error) {
+      console.error('Error loading admin data', error)
+      setReport([])
+      setAgents([])
+    }
   }
 
   useEffect(() => {
