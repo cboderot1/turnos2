@@ -8,10 +8,19 @@ export function PantallaPage() {
   const [attending, setAttending] = useState<AgentState[]>([])
 
   const load = async () => {
-    const res = await axios.get<{ matrizador_queue: Ticket[]; asesor_queue: Ticket[]; attending: AgentState[] }>('/api/tickets/queue')
-    setMatrizadores(res.data.matrizador_queue)
-    setAsesorias(res.data.asesor_queue)
-    setAttending(res.data.attending)
+    try {
+      const res = await axios.get<{ matrizador_queue?: Ticket[]; asesor_queue?: Ticket[]; attending?: AgentState[] }>(
+        '/api/tickets/queue'
+      )
+      setMatrizadores(res.data.matrizador_queue ?? [])
+      setAsesorias(res.data.asesor_queue ?? [])
+      setAttending(res.data.attending ?? [])
+    } catch (error) {
+      console.error('Error cargando colas de tickets', error)
+      setMatrizadores([])
+      setAsesorias([])
+      setAttending([])
+    }
   }
 
   useEffect(() => {
