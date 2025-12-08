@@ -6,6 +6,13 @@ export function AdminPage() {
   const [report, setReport] = useState<Ticket[]>([])
   const [agents, setAgents] = useState<AgentState[]>([])
 
+  const cardClass = 'bg-slate-900/80 border border-slate-800 rounded-xl p-6 shadow-xl backdrop-blur'
+  const buttonBase =
+    'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
+  const primaryButton = `${buttonBase} bg-emerald-500 text-emerald-950 hover:bg-emerald-400 focus-visible:outline-emerald-400`
+  const secondaryButton = `${buttonBase} bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-slate-300`
+  const badgeBase = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide'
+
   const load = async () => {
     const [reportRes, queueRes] = await Promise.all([
       axios.get<Ticket[]>('/api/reports'),
@@ -27,13 +34,13 @@ export function AdminPage() {
 
   return (
     <section id="admin" className="mx-auto max-w-6xl px-4 py-12">
-      <div className="card">
+      <div className={cardClass}>
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-wide text-emerald-400">Control total</p>
             <h2 className="text-2xl font-bold">Administrador</h2>
           </div>
-          <button className="btn-secondary" onClick={load}>
+          <button className={secondaryButton} onClick={load}>
             Actualizar
           </button>
         </div>
@@ -47,7 +54,7 @@ export function AdminPage() {
                     <p className="text-sm font-medium">Agente #{agent.user_id}</p>
                     <p className="text-xs text-slate-400">Estado: {agent.status}</p>
                   </div>
-                  <button className="btn-primary" onClick={() => toggle(agent)}>
+                  <button className={primaryButton} onClick={() => toggle(agent)}>
                     Cambiar a {agent.status === 'BUSY' ? 'Libre' : 'Ocupado'}
                   </button>
                 </li>
@@ -61,7 +68,13 @@ export function AdminPage() {
                 <article key={item.id} className="rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-sm">
                   <div className="flex items-center justify-between">
                     <p className="text-emerald-300 font-bold">Turno #{item.id}</p>
-                    <span className="badge {item.priority ? 'badge-priority' : 'badge-normal'}">
+                    <span
+                      className={
+                        item.priority
+                          ? `${badgeBase} bg-amber-400 text-amber-900`
+                          : `${badgeBase} bg-slate-700 text-slate-100`
+                      }
+                    >
                       {item.service_type}
                     </span>
                   </div>
