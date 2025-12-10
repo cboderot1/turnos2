@@ -22,14 +22,14 @@ function App() {
   const [selectedModule, setSelectedModule] = useState<ModuleKey | null>(null)
   const [showAdminAuth, setShowAdminAuth] = useState(false)
   const [adminUser, setAdminUser] = useState<User | null>(null)
+  const [pendingAdminModule, setPendingAdminModule] = useState<ModuleKey | null>(null)
 
   const handleSelect = (module: ModuleKey | null) => {
-    if (module === 'admin') {
-      if (adminUser) {
-        setSelectedModule('admin')
-      } else {
-        setShowAdminAuth(true)
-      }
+    const requiresAdmin = module && ['admin', 'test'].includes(module)
+
+    if (requiresAdmin && !adminUser) {
+      setPendingAdminModule(module)
+      setShowAdminAuth(true)
       return
     }
 
@@ -38,7 +38,8 @@ function App() {
 
   const handleAdminSuccess = (user: User) => {
     setAdminUser(user)
-    setSelectedModule('admin')
+    setSelectedModule(pendingAdminModule ?? 'admin')
+    setPendingAdminModule(null)
     setShowAdminAuth(false)
   }
 
@@ -86,7 +87,10 @@ function App() {
       </main>
       <AdminAuthModal
         isOpen={showAdminAuth}
-        onClose={() => setShowAdminAuth(false)}
+        onClose={() => {
+          setShowAdminAuth(false)
+          setPendingAdminModule(null)
+        }}
         onSuccess={handleAdminSuccess}
       />
     </div>
