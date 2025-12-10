@@ -8,13 +8,14 @@ from sqlalchemy.orm import Session
 
 from ..core.database import get_db
 from ..core import auth
-from ..models import UserRole, AgentStatus, AgentState, Ticket, TicketStatus
+from ..models import UserRole, AgentStatus, AgentState, Ticket, TicketStatus, User
 from ..schemas import (
     Token,
     UserRead,
     TicketCreate,
     TicketRead,
     AgentStateRead,
+    AgentSummary,
     QueueSummary,
 )
 from ..services.queue import assign_ticket, get_next_ticket, release_agent, complete_ticket
@@ -86,6 +87,36 @@ def queue_summary(db: Session = Depends(get_db)):
         asesor_queue=asesor_queue,
         attending=attending,
     )
+
+
+@router.get("/agents", response_model=List[AgentSummary])
+def list_agents(
+    _=Depends(auth.require_roles(UserRole.ADMIN)),
+    db: Session = Depends(get_db),
+):
+    users = (
+        db.query(User)
+        .filter(User.role.in_([UserRole.ASESOR, UserRole.MATRIZADOR]))
+        .all()
+    )
+    states = db.query(AgentState).all()
+    state_map = {state.user_id: state for state in states}
+
+    summaries: List[AgentSummary] = []
+    for user in users:
+        state = state_map.get(user.id)
+        summaries.append(
+            AgentSummary(
+                id=user.id,
+                username=user.username,
+                display_name=user.display_name,
+                role=user.role,
+                status=state.status if state else AgentStatus.FREE,
+                current_ticket_id=state.current_ticket_id if state else None,
+            )
+        )
+
+    return summaries
 
 
 @router.get("/agents/me", response_model=AgentStateRead)

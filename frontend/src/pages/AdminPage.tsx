@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { AgentState, Ticket } from '../types'
+import { AgentState, AgentSummary, Ticket } from '../types'
 
 export function AdminPage() {
   const [report, setReport] = useState<Ticket[]>([])
   const [agents, setAgents] = useState<AgentState[]>([])
+  const [registeredAgents, setRegisteredAgents] = useState<AgentSummary[]>([])
 
   const cardClass = 'bg-slate-900/80 border border-slate-800 rounded-xl p-6 shadow-xl backdrop-blur'
   const buttonBase =
@@ -15,16 +16,19 @@ export function AdminPage() {
 
   const load = async () => {
     try {
-      const [reportRes, queueRes] = await Promise.all([
+      const [reportRes, queueRes, registeredRes] = await Promise.all([
         axios.get<Ticket[]>('/api/reports'),
         axios.get<{ attending?: AgentState[] }>('/api/tickets/queue'),
+        axios.get<AgentSummary[]>('/api/agents'),
       ])
       setReport(Array.isArray(reportRes.data) ? reportRes.data : [])
       setAgents(Array.isArray(queueRes.data?.attending) ? queueRes.data.attending : [])
+      setRegisteredAgents(Array.isArray(registeredRes.data) ? registeredRes.data : [])
     } catch (error) {
       console.error('Error loading admin data', error)
       setReport([])
       setAgents([])
+      setRegisteredAgents([])
     }
   }
 
@@ -90,6 +94,39 @@ export function AdminPage() {
               ))}
               {report.length === 0 && <p className="text-slate-400">Sin atenciones finalizadas.</p>}
             </div>
+          </div>
+        </div>
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold">Agentes registrados</h3>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {registeredAgents.map((agent) => (
+              <article key={agent.id} className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-100">{agent.display_name}</p>
+                    <p className="text-xs text-slate-400">Usuario: {agent.username}</p>
+                  </div>
+                  <span
+                    className={`${badgeBase} ${
+                      agent.role === 'ASESOR'
+                        ? 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/40'
+                        : 'bg-amber-500/20 text-amber-200 ring-1 ring-amber-400/40'
+                    }`}
+                  >
+                    {agent.role === 'ASESOR' ? 'Asesor' : 'Matrizador'}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-300">
+                  Estado actual: <span className="font-semibold">{agent.status === 'BUSY' ? 'Ocupado' : 'Libre'}</span>
+                </p>
+                {agent.current_ticket_id && (
+                  <p className="text-xs text-emerald-300">Atendiendo turno #{agent.current_ticket_id}</p>
+                )}
+              </article>
+            ))}
+            {registeredAgents.length === 0 && (
+              <p className="text-sm text-slate-400">No hay asesores o matrizadores registrados.</p>
+            )}
           </div>
         </div>
       </div>
