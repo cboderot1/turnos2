@@ -51,6 +51,13 @@ export type UserListItem = {
   role: 'ADMIN' | 'ASESOR' | 'MATRIZADOR'
 }
 
+export type User = {
+  id: number
+  username: string
+  display_name: string
+  role: 'ADMIN' | 'ASESOR' | 'MATRIZADOR'
+}
+
 export type DatabaseTestUser = {
   id: number
   username: string

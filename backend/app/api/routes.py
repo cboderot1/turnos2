@@ -36,6 +36,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.get("/auth/me", response_model=UserRead)
+def get_current_user(current: User = Depends(auth.get_current_user)):
+    return current
+
+
 @router.post("/tickets", response_model=TicketRead)
 def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)):
     priority = payload.client_type.name in {"TERCERA_EDAD", "DISCAPACITADO"}
