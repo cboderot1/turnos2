@@ -1,16 +1,29 @@
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
+import { ModuleKey } from '../types'
 
-const links = [
-  { href: '#cliente', label: 'Cliente' },
-  { href: '#matrizador', label: 'Matrizador' },
-  { href: '#asesor', label: 'Asesor' },
-  { href: '#admin', label: 'Administrador' },
-  { href: '#pantalla', label: 'Pantalla' },
+type NavLink = {
+  key: ModuleKey | null
+  label: string
+}
+
+type NavBarProps = {
+  selected: ModuleKey | null
+  onSelect: (value: ModuleKey | null) => void
+}
+
+const links: NavLink[] = [
+  { key: null, label: 'Inicio' },
+  { key: 'cliente', label: 'Cliente' },
+  { key: 'matrizador', label: 'Matrizador' },
+  { key: 'asesor', label: 'Asesor' },
+  { key: 'admin', label: 'Administrador' },
+  { key: 'pantalla', label: 'Pantalla' },
 ]
 
-export function NavBar() {
+export function NavBar({ onSelect, selected }: NavBarProps) {
   const [open, setOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:py-4">
@@ -20,13 +33,25 @@ export function NavBar() {
         </button>
         <nav className={`${open ? 'block' : 'hidden'} sm:block`}>
           <ul className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 text-sm font-medium">
-            {links.map((link) => (
-              <li key={link.href}>
-                <a className="text-slate-100 hover:text-emerald-300" href={link.href}>
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {links.map((link) => {
+              const isActive = link.key === selected
+              return (
+                <li key={link.key}>
+                  <button
+                    className={`rounded-lg px-2 py-1 transition hover:text-emerald-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 ${
+                      isActive ? 'text-emerald-300' : 'text-slate-100'
+                    }`}
+                    onClick={() => {
+                      onSelect(link.key)
+                      setOpen(false)
+                    }}
+                    type="button"
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </nav>
       </div>

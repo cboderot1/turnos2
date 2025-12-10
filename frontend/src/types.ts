@@ -27,3 +27,5 @@ export type AgentState = {
   status: 'FREE' | 'BUSY'
   current_ticket_id?: number
 }
+
+export type ModuleKey = 'cliente' | 'matrizador' | 'asesor' | 'admin' | 'pantalla'
