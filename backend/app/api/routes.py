@@ -205,7 +205,10 @@ def list_users(_=Depends(auth.require_roles(UserRole.ADMIN)), db: Session = Depe
 
 
 @router.get("/test/db", response_model=DatabaseTestResponse, tags=["health"])
-def test_database(db: Session = Depends(get_db)):
+def test_database(
+    _: UserRead = Depends(auth.require_roles(UserRole.ADMIN)),
+    db: Session = Depends(get_db),
+):
     """Verify database connectivity and list users for diagnostics."""
 
     users = db.query(User).order_by(User.id.asc()).all()
