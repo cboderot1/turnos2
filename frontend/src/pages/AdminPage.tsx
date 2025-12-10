@@ -59,14 +59,37 @@ export function AdminPage() {
             <h3 className="text-lg font-semibold">Estados de agentes</h3>
             <ul className="mt-3 space-y-3">
               {agents.map((agent) => (
-                <li key={agent.id} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2">
-                  <div>
-                    <p className="text-sm font-medium">Agente #{agent.user_id}</p>
-                    <p className="text-xs text-slate-400">Estado: {agent.status}</p>
+                <li
+                  key={agent.id}
+                  className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2"
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-100">
+                      {agent.user?.display_name ?? `Agente #${agent.user_id}`}
+                    </p>
+                    <p className="text-xs text-slate-400">Usuario: {agent.user?.username ?? agent.user_id}</p>
+                    <span
+                      className={`${badgeBase} ${
+                        agent.user?.role === 'ASESOR'
+                          ? 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/40'
+                          : agent.user?.role === 'MATRIZADOR'
+                            ? 'bg-amber-500/20 text-amber-200 ring-1 ring-amber-400/40'
+                            : 'bg-slate-700 text-slate-100'
+                      }`}
+                    >
+                      {agent.user?.role === 'ASESOR'
+                        ? 'Asesor'
+                        : agent.user?.role === 'MATRIZADOR'
+                          ? 'Matrizador'
+                          : 'Sin rol'}
+                    </span>
                   </div>
-                  <button className={primaryButton} onClick={() => toggle(agent)}>
-                    Cambiar a {agent.status === 'BUSY' ? 'Libre' : 'Ocupado'}
-                  </button>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-400">Estado: {agent.status === 'BUSY' ? 'Ocupado' : 'Libre'}</p>
+                    <button className={`${primaryButton} mt-2`} onClick={() => toggle(agent)}>
+                      Cambiar a {agent.status === 'BUSY' ? 'Libre' : 'Ocupado'}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

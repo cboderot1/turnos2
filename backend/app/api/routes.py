@@ -4,7 +4,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..core.database import get_db
 from ..core import auth
@@ -81,7 +81,7 @@ def queue_summary(db: Session = Depends(get_db)):
     pending = db.query(Ticket).filter(Ticket.status == TicketStatus.PENDING).all()
     matrizador_queue = [t for t in pending if t.service_type.name == "TRAMITE"]
     asesor_queue = [t for t in pending if t.service_type.name == "ASESORIA"]
-    attending = db.query(AgentState).all()
+    attending = db.query(AgentState).options(joinedload(AgentState.user)).all()
     return QueueSummary(
         matrizador_queue=matrizador_queue,
         asesor_queue=asesor_queue,
