@@ -26,6 +26,21 @@ export type AgentState = {
   user_id: number
   status: 'FREE' | 'BUSY'
   current_ticket_id?: number
+  user?: {
+    id: number
+    username: string
+    display_name: string
+    role: 'ADMIN' | 'ASESOR' | 'MATRIZADOR'
+  }
+}
+
+export type AgentSummary = {
+  id: number
+  username: string
+  display_name: string
+  role: 'ASESOR' | 'MATRIZADOR'
+  status: 'FREE' | 'BUSY'
+  current_ticket_id?: number | null
 }
 
 export type ModuleKey = 'cliente' | 'matrizador' | 'asesor' | 'admin' | 'pantalla'

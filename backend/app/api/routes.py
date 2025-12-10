@@ -4,17 +4,18 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..core.database import get_db
 from ..core import auth
-from ..models import UserRole, AgentStatus, AgentState, Ticket, TicketStatus
+from ..models import UserRole, AgentStatus, AgentState, Ticket, TicketStatus, User
 from ..schemas import (
     Token,
     UserRead,
     TicketCreate,
     TicketRead,
     AgentStateRead,
+    AgentSummary,
     QueueSummary,
 )
 from ..services.queue import assign_ticket, get_next_ticket, release_agent, complete_ticket
@@ -80,12 +81,42 @@ def queue_summary(db: Session = Depends(get_db)):
     pending = db.query(Ticket).filter(Ticket.status == TicketStatus.PENDING).all()
     matrizador_queue = [t for t in pending if t.service_type.name == "TRAMITE"]
     asesor_queue = [t for t in pending if t.service_type.name == "ASESORIA"]
-    attending = db.query(AgentState).all()
+    attending = db.query(AgentState).options(joinedload(AgentState.user)).all()
     return QueueSummary(
         matrizador_queue=matrizador_queue,
         asesor_queue=asesor_queue,
         attending=attending,
     )
+
+
+@router.get("/agents", response_model=List[AgentSummary])
+def list_agents(
+    _=Depends(auth.require_roles(UserRole.ADMIN)),
+    db: Session = Depends(get_db),
+):
+    users = (
+        db.query(User)
+        .filter(User.role.in_([UserRole.ASESOR, UserRole.MATRIZADOR]))
+        .all()
+    )
+    states = db.query(AgentState).all()
+    state_map = {state.user_id: state for state in states}
+
+    summaries: List[AgentSummary] = []
+    for user in users:
+        state = state_map.get(user.id)
+        summaries.append(
+            AgentSummary(
+                id=user.id,
+                username=user.username,
+                display_name=user.display_name,
+                role=user.role,
+                status=state.status if state else AgentStatus.FREE,
+                current_ticket_id=state.current_ticket_id if state else None,
+            )
+        )
+
+    return summaries
 
 
 @router.get("/agents/me", response_model=AgentStateRead)

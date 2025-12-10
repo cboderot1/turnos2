@@ -60,9 +60,19 @@ class AgentStateRead(BaseModel):
     user_id: int
     status: AgentStatus
     current_ticket_id: Optional[int]
+    user: Optional[UserRead]
 
     class Config:
         orm_mode = True
+
+
+class AgentSummary(BaseModel):
+    id: int
+    username: str
+    display_name: str
+    role: UserRole
+    status: AgentStatus
+    current_ticket_id: Optional[int]
 
 
 class ReportItem(BaseModel):
