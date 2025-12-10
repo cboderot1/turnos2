@@ -6,7 +6,8 @@ import { AdminPage } from './pages/AdminPage'
 import { PantallaPage } from './pages/PantallaPage'
 import { TestDbPage } from './pages/TestDbPage'
 import { NavBar } from './components/NavBar'
-import { ModuleKey } from './types'
+import { AdminAuthModal } from './components/AdminAuthModal'
+import { ModuleKey, User } from './types'
 
 const moduleComponents: Record<ModuleKey, JSX.Element> = {
   cliente: <ClientePage />,
@@ -19,10 +20,31 @@ const moduleComponents: Record<ModuleKey, JSX.Element> = {
 
 function App() {
   const [selectedModule, setSelectedModule] = useState<ModuleKey | null>(null)
+  const [showAdminAuth, setShowAdminAuth] = useState(false)
+  const [adminUser, setAdminUser] = useState<User | null>(null)
+
+  const handleSelect = (module: ModuleKey | null) => {
+    if (module === 'admin') {
+      if (adminUser) {
+        setSelectedModule('admin')
+      } else {
+        setShowAdminAuth(true)
+      }
+      return
+    }
+
+    setSelectedModule(module)
+  }
+
+  const handleAdminSuccess = (user: User) => {
+    setAdminUser(user)
+    setSelectedModule('admin')
+    setShowAdminAuth(false)
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
-      <NavBar onSelect={setSelectedModule} selected={selectedModule} />
+      <NavBar onSelect={handleSelect} selected={selectedModule} />
       <main className="flex flex-col items-center px-4 pb-16">
         {selectedModule ? (
           <div className="w-full">{moduleComponents[selectedModule]}</div>
@@ -38,7 +60,7 @@ function App() {
             <div className="grid w-full gap-6 sm:grid-cols-2">
               <button
                 className="flex flex-col gap-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-6 text-left shadow-xl transition hover:-translate-y-1 hover:border-emerald-400 hover:bg-emerald-500/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-                onClick={() => setSelectedModule('cliente')}
+                onClick={() => handleSelect('cliente')}
                 type="button"
               >
                 <p className="text-sm font-semibold uppercase tracking-wide text-emerald-300">Solicitar turno</p>
@@ -49,7 +71,7 @@ function App() {
               </button>
               <button
                 className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 p-6 text-left shadow-xl transition hover:-translate-y-1 hover:border-emerald-400 hover:bg-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-                onClick={() => setSelectedModule('pantalla')}
+                onClick={() => handleSelect('pantalla')}
                 type="button"
               >
                 <p className="text-sm font-semibold uppercase tracking-wide text-slate-300">Mostrar pantalla únicamente</p>
@@ -62,6 +84,11 @@ function App() {
           </section>
         )}
       </main>
+      <AdminAuthModal
+        isOpen={showAdminAuth}
+        onClose={() => setShowAdminAuth(false)}
+        onSuccess={handleAdminSuccess}
+      />
     </div>
   )
 }
