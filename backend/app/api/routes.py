@@ -191,3 +191,8 @@ def complete_ticket_endpoint(
 @router.get("/reports", response_model=List[TicketRead])
 def report(_=Depends(auth.require_roles(UserRole.ADMIN)), db: Session = Depends(get_db)):
     return db.query(Ticket).filter(Ticket.status == TicketStatus.DONE).order_by(Ticket.created_at.desc()).all()
+
+
+@router.get("/users", response_model=List[UserRead])
+def list_users(_=Depends(auth.require_roles(UserRole.ADMIN)), db: Session = Depends(get_db)):
+    return db.query(User).order_by(User.username.asc()).all()

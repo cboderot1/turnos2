@@ -53,3 +53,9 @@ export type AgentSummary = {
 }
 
 export type ModuleKey = 'cliente' | 'matrizador' | 'asesor' | 'admin' | 'pantalla'
+
+export type UserListItem = {
+  id: number
+  username: string
+  role: 'ADMIN' | 'ASESOR' | 'MATRIZADOR'
+}
