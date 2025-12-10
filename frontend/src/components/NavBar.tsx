@@ -3,17 +3,16 @@ import { useState } from 'react'
 import { ModuleKey } from '../types'
 
 type NavLink = {
-  key: ModuleKey | null
+  key: ModuleKey
   label: string
 }
 
 type NavBarProps = {
   selected: ModuleKey | null
-  onSelect: (value: ModuleKey | null) => void
+  onSelect: (value: ModuleKey) => void
 }
 
 const links: NavLink[] = [
-  { key: null, label: 'Inicio' },
   { key: 'cliente', label: 'Cliente' },
   { key: 'matrizador', label: 'Matrizador' },
   { key: 'asesor', label: 'Asesor' },
