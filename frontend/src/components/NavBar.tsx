@@ -3,16 +3,17 @@ import { useState } from 'react'
 import { ModuleKey } from '../types'
 
 type NavLink = {
-  key: ModuleKey
+  key: ModuleKey | 'inicio'
   label: string
 }
 
 type NavBarProps = {
   selected: ModuleKey | null
-  onSelect: (value: ModuleKey) => void
+  onSelect: (value: ModuleKey | null) => void
 }
 
 const links: NavLink[] = [
+  { key: 'inicio', label: 'Inicio' },
   { key: 'cliente', label: 'Cliente' },
   { key: 'matrizador', label: 'Matrizador' },
   { key: 'asesor', label: 'Asesor' },
@@ -33,7 +34,8 @@ export function NavBar({ onSelect, selected }: NavBarProps) {
         <nav className={`${open ? 'block' : 'hidden'} sm:block`}>
           <ul className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 text-sm font-medium">
             {links.map((link) => {
-              const isActive = link.key === selected
+              const isActive =
+                link.key === 'inicio' ? selected === null : link.key === selected
               return (
                 <li key={link.key}>
                   <button
@@ -41,7 +43,8 @@ export function NavBar({ onSelect, selected }: NavBarProps) {
                       isActive ? 'text-emerald-300' : 'text-slate-100'
                     }`}
                     onClick={() => {
-                      onSelect(link.key)
+                      const nextValue = link.key === 'inicio' ? null : link.key
+                      onSelect(nextValue)
                       setOpen(false)
                     }}
                     type="button"
