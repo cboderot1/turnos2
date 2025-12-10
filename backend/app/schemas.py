@@ -84,3 +84,9 @@ class QueueSummary(BaseModel):
     matrizador_queue: List[TicketRead]
     asesor_queue: List[TicketRead]
     attending: List[AgentStateRead]
+
+
+class DatabaseTestResponse(BaseModel):
+    status: str
+    user_count: int
+    users: List[UserRead]

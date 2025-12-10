@@ -17,6 +17,7 @@ from ..schemas import (
     AgentStateRead,
     AgentSummary,
     QueueSummary,
+    DatabaseTestResponse,
 )
 from ..services.queue import assign_ticket, get_next_ticket, release_agent, complete_ticket
 
@@ -196,3 +197,11 @@ def report(_=Depends(auth.require_roles(UserRole.ADMIN)), db: Session = Depends(
 @router.get("/users", response_model=List[UserRead])
 def list_users(_=Depends(auth.require_roles(UserRole.ADMIN)), db: Session = Depends(get_db)):
     return db.query(User).order_by(User.username.asc()).all()
+
+
+@router.get("/test/db", response_model=DatabaseTestResponse, tags=["health"])
+def test_database(db: Session = Depends(get_db)):
+    """Verify database connectivity and list users for diagnostics."""
+
+    users = db.query(User).order_by(User.id.asc()).all()
+    return DatabaseTestResponse(status="ok", user_count=len(users), users=users)

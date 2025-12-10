@@ -43,19 +43,23 @@ export type AgentSummary = {
   current_ticket_id?: number | null
 }
 
-export type AgentSummary = {
-  id: number
-  username: string
-  display_name: string
-  role: 'ASESOR' | 'MATRIZADOR'
-  status: 'FREE' | 'BUSY'
-  current_ticket_id?: number | null
-}
-
-export type ModuleKey = 'cliente' | 'matrizador' | 'asesor' | 'admin' | 'pantalla'
+export type ModuleKey = 'cliente' | 'matrizador' | 'asesor' | 'admin' | 'pantalla' | 'test'
 
 export type UserListItem = {
   id: number
   username: string
   role: 'ADMIN' | 'ASESOR' | 'MATRIZADOR'
+}
+
+export type DatabaseTestUser = {
+  id: number
+  username: string
+  display_name: string
+  role: 'ADMIN' | 'ASESOR' | 'MATRIZADOR'
+}
+
+export type DatabaseTestResponse = {
+  status: string
+  user_count: number
+  users: DatabaseTestUser[]
 }

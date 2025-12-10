@@ -4,6 +4,7 @@ import { MatrizadorPage } from './pages/MatrizadorPage'
 import { AsesorPage } from './pages/AsesorPage'
 import { AdminPage } from './pages/AdminPage'
 import { PantallaPage } from './pages/PantallaPage'
+import { TestDbPage } from './pages/TestDbPage'
 import { NavBar } from './components/NavBar'
 import { ModuleKey } from './types'
 
@@ -13,6 +14,7 @@ const moduleComponents: Record<ModuleKey, JSX.Element> = {
   asesor: <AsesorPage />,
   admin: <AdminPage />,
   pantalla: <PantallaPage />,
+  test: <TestDbPage />,
 }
 
 function App() {
