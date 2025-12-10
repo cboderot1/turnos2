@@ -19,6 +19,7 @@ const links: NavLink[] = [
   { key: 'asesor', label: 'Asesor' },
   { key: 'admin', label: 'Administrador' },
   { key: 'pantalla', label: 'Pantalla' },
+  { key: 'test', label: 'Test DB' },
 ]
 
 export function NavBar({ onSelect, selected }: NavBarProps) {
