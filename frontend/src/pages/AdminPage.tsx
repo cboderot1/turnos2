@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { AgentState, AgentSummary, Ticket } from '../types'
+import { AgentState, AgentSummary, Ticket, UserListItem } from '../types'
 
 export function AdminPage() {
   const [report, setReport] = useState<Ticket[]>([])
   const [agents, setAgents] = useState<AgentState[]>([])
   const [registeredAgents, setRegisteredAgents] = useState<AgentSummary[]>([])
+  const [users, setUsers] = useState<UserListItem[]>([])
 
   const cardClass = 'bg-slate-900/80 border border-slate-800 rounded-xl p-6 shadow-xl backdrop-blur'
   const buttonBase =
@@ -16,19 +17,22 @@ export function AdminPage() {
 
   const load = async () => {
     try {
-      const [reportRes, queueRes, registeredRes] = await Promise.all([
+      const [reportRes, queueRes, registeredRes, usersRes] = await Promise.all([
         axios.get<Ticket[]>('/api/reports'),
         axios.get<{ attending?: AgentState[] }>('/api/tickets/queue'),
         axios.get<AgentSummary[]>('/api/agents'),
+        axios.get<UserListItem[]>('/api/users'),
       ])
       setReport(Array.isArray(reportRes.data) ? reportRes.data : [])
       setAgents(Array.isArray(queueRes.data?.attending) ? queueRes.data.attending : [])
       setRegisteredAgents(Array.isArray(registeredRes.data) ? registeredRes.data : [])
+      setUsers(Array.isArray(usersRes.data) ? usersRes.data : [])
     } catch (error) {
       console.error('Error loading admin data', error)
       setReport([])
       setAgents([])
       setRegisteredAgents([])
+      setUsers([])
     }
   }
 
@@ -150,6 +154,33 @@ export function AdminPage() {
             {registeredAgents.length === 0 && (
               <p className="text-sm text-slate-400">No hay asesores o matrizadores registrados.</p>
             )}
+          </div>
+        </div>
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold">Usuarios del sistema</h3>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {users.map((user) => (
+              <article key={user.id} className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-100">{user.username}</p>
+                    <p className="text-xs text-slate-400">ID: {user.id}</p>
+                  </div>
+                  <span
+                    className={`${badgeBase} ${
+                      user.role === 'ADMIN'
+                        ? 'bg-purple-500/20 text-purple-200 ring-1 ring-purple-400/40'
+                        : user.role === 'ASESOR'
+                          ? 'bg-blue-500/20 text-blue-200 ring-1 ring-blue-400/40'
+                          : 'bg-amber-500/20 text-amber-200 ring-1 ring-amber-400/40'
+                    }`}
+                  >
+                    {user.role === 'ADMIN' ? 'Administrador' : user.role === 'ASESOR' ? 'Asesor' : 'Matrizador'}
+                  </span>
+                </div>
+              </article>
+            ))}
+            {users.length === 0 && <p className="text-sm text-slate-400">No hay usuarios registrados.</p>}
           </div>
         </div>
       </div>
