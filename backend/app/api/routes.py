@@ -74,14 +74,6 @@ def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)):
     return ticket
 
 
-@router.get("/tickets/{ticket_id}", response_model=TicketRead)
-def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
-    if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket not found")
-    return ticket
-
-
 @router.get("/tickets/queue", response_model=QueueSummary)
 def queue_summary(db: Session = Depends(get_db)):
     pending = db.query(Ticket).filter(Ticket.status == TicketStatus.PENDING).all()
@@ -93,6 +85,14 @@ def queue_summary(db: Session = Depends(get_db)):
         asesor_queue=asesor_queue,
         attending=attending,
     )
+
+
+@router.get("/tickets/{ticket_id}", response_model=TicketRead)
+def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    return ticket
 
 
 @router.get("/agents", response_model=List[AgentSummary])
