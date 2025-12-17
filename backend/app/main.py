@@ -25,3 +25,9 @@ app.include_router(router)
 @app.get("/health", tags=["health"])
 def healthcheck():
     return {"status": "ok"}
+
+
+# Alias para chequeos detrás de un reverse proxy que espera /api/health
+@app.get("/api/health", tags=["health"])
+def healthcheck_api():
+    return {"status": "ok"}
