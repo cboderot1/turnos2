@@ -12,7 +12,8 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from ..models import User, UserRole
 
-SECRET_KEY = os.getenv("SECRET_KEY", "insecure-dev-secret")
+#SECRET_KEY = os.getenv("SECRET_KEY", "insecure-dev-secret")
+SECRET_KEY = os.getenv("SECRET_KEY", "Andromeda2025")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 8 * 60
 
