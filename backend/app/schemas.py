@@ -1,7 +1,7 @@
 """Pydantic schemas for API validation."""
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from .models import UserRole, AgentStatus, ServiceType, ClientType, TicketStatus
 
 
@@ -26,9 +26,7 @@ class UserCreate(UserBase):
 
 class UserRead(UserBase):
     id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TicketCreate(BaseModel):
@@ -51,8 +49,7 @@ class TicketRead(BaseModel):
     assigned_to: Optional[int]
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AgentStateRead(BaseModel):
@@ -62,8 +59,7 @@ class AgentStateRead(BaseModel):
     current_ticket_id: Optional[int]
     user: Optional[UserRead]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AgentSummary(BaseModel):
