@@ -17,32 +17,33 @@ export function MatrizadorPage({ user }: MatrizadorPageProps) {
   const secondaryButton = `${buttonBase} bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-slate-300 disabled:cursor-not-allowed disabled:opacity-70`
   const badgeBase = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide'
 
-  useEffect(() => {
+  const loadState = async () => {
     if (!user) return
-
-    const load = async () => {
-      const res = await axios.get<AgentState>('/api/agents/me')
-      setState(res.data)
-      if (res.data.current_ticket_id) {
-        const ticketRes = await axios.get<Ticket>(`/api/tickets/${res.data.current_ticket_id}`)
-        setTicket(ticketRes.data)
-      }
+    const res = await axios.get<AgentState>('/api/agents/me')
+    setState(res.data)
+    if (res.data.current_ticket_id) {
+      const ticketRes = await axios.get<Ticket>(`/api/tickets/${res.data.current_ticket_id}`)
+      setTicket(ticketRes.data)
+    } else {
+      setTicket(null)
     }
-    load()
+  }
+
+  useEffect(() => {
+    loadState()
   }, [user])
 
   const takeNext = async () => {
     if (!state?.user_id) return
     const res = await axios.post<Ticket>(`/api/agents/${state.user_id}/next`)
     setTicket(res.data)
-    setState({ ...(state as AgentState), status: 'BUSY', current_ticket_id: res.data.id })
+    await loadState()
   }
 
   const finish = async () => {
     if (!ticket) return
     await axios.post(`/api/tickets/${ticket.id}/complete`)
-    setTicket(null)
-    setState({ ...(state as AgentState), status: 'FREE', current_ticket_id: undefined })
+    await loadState()
   }
 
   if (!user) {
