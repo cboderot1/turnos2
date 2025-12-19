@@ -24,6 +24,12 @@ export function ClientePage() {
     try {
       const response = await axios.post<Ticket>('/api/tickets', form)
       setTicket(response.data)
+      setForm({
+        ...form,
+        client_identifier: '',
+        client_name: '',
+        motive: '',
+      })
     } catch (err) {
       setError('No se pudo crear el turno')
     }
@@ -106,6 +112,12 @@ export function ClientePage() {
           <div className="mt-6 rounded-lg border border-emerald-500/50 bg-emerald-500/10 p-4 text-sm">
             <p className="font-semibold text-emerald-200">Turno generado</p>
             <p className="text-emerald-100">#{ticket.id} • {ticket.service_type}</p>
+            <ul className="mt-2 space-y-1 text-emerald-100">
+              <li><span className="font-medium">Identificación:</span> {ticket.client_identifier}</li>
+              <li><span className="font-medium">Nombre completo:</span> {ticket.client_name}</li>
+              <li><span className="font-medium">Motivo:</span> {ticket.motive}</li>
+              <li><span className="font-medium">Tipo de cliente:</span> {ticket.client_type}</li>
+            </ul>
           </div>
         )}
       </div>
