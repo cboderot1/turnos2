@@ -76,7 +76,12 @@ def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)):
 
 @router.get("/tickets/queue", response_model=QueueSummary)
 def queue_summary(db: Session = Depends(get_db)):
-    pending = db.query(Ticket).filter(Ticket.status == TicketStatus.PENDING).all()
+    pending = (
+        db.query(Ticket)
+        .filter(Ticket.status == TicketStatus.PENDING)
+        .filter(Ticket.assigned_to.is_(None))
+        .all()
+    )
     matrizador_queue = [t for t in pending if t.service_type.name == "TRAMITE"]
     asesor_queue = [t for t in pending if t.service_type.name == "ASESORIA"]
     attending = db.query(AgentState).options(joinedload(AgentState.user)).all()

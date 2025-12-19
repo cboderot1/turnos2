@@ -12,8 +12,11 @@ export function PantallaPage() {
       const res = await axios.get<{ matrizador_queue?: Ticket[]; asesor_queue?: Ticket[]; attending?: AgentState[] }>(
         '/api/tickets/queue'
       )
-      setMatrizadores(res.data.matrizador_queue ?? [])
-      setAsesorias(res.data.asesor_queue ?? [])
+      const pendingTramites = (res.data.matrizador_queue ?? []).filter((ticket) => !ticket.assigned_to)
+      const pendingAsesorias = (res.data.asesor_queue ?? []).filter((ticket) => !ticket.assigned_to)
+
+      setMatrizadores(pendingTramites)
+      setAsesorias(pendingAsesorias)
       setAttending(res.data.attending ?? [])
     } catch (error) {
       console.error('Error cargando colas de tickets', error)
@@ -42,8 +45,26 @@ export function PantallaPage() {
             <ul className="mt-4 space-y-3 text-lg">
               {attending.map((agent) => (
                 <li key={agent.id} className="flex items-center justify-between rounded-xl bg-slate-900/70 px-4 py-3">
-                  <span className="font-medium text-white">Puesto #{agent.user_id}</span>
-                  <span className="text-emerald-300 text-sm">{agent.status === 'BUSY' ? `Turno ${agent.current_ticket_id}` : 'Libre'}</span>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-white">{agent.user?.display_name ?? `Agente #${agent.user_id}`}</span>
+                    <span className="text-xs uppercase tracking-wide text-emerald-200">
+                      {agent.user?.role === 'MATRIZADOR'
+                        ? 'Matrizador'
+                        : agent.user?.role === 'ASESOR'
+                        ? 'Asesor'
+                        : 'Agente'}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    {agent.status === 'BUSY' && agent.current_ticket_id ? (
+                      <>
+                        <p className="text-emerald-300 text-sm">Atendiendo</p>
+                        <p className="text-lg font-bold text-white">Turno #{agent.current_ticket_id}</p>
+                      </>
+                    ) : (
+                      <p className="text-slate-300">Libre</p>
+                    )}
+                  </div>
                 </li>
               ))}
               {attending.length === 0 && <p className="text-slate-300">Sin agentes activos.</p>}
