@@ -1,18 +1,45 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 import axios from 'axios'
 import { User } from '../types'
 
-type AdminAuthModalProps = {
+type AuthModalProps = {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (user: User) => void
+  allowedRoles: User['role'][]
+  title: string
+  description?: string
+  onSuccess: (user: User, token: string) => void
 }
 
-export function AdminAuthModal({ isOpen, onClose, onSuccess }: AdminAuthModalProps) {
+const ROLE_LABELS: Record<User['role'], string> = {
+  ADMIN: 'Administrador',
+  ASESOR: 'Asesor',
+  MATRIZADOR: 'Matrizador',
+}
+
+export function AdminAuthModal({
+  isOpen,
+  onClose,
+  allowedRoles,
+  title,
+  description,
+  onSuccess,
+}: AuthModalProps) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  const allowedLabel = useMemo(() => {
+    if (allowedRoles.length === 0) return 'usuarios autorizados'
+    if (allowedRoles.length === 1) return ROLE_LABELS[allowedRoles[0]]
+    if (allowedRoles.length === 2) return `${ROLE_LABELS[allowedRoles[0]]} o ${ROLE_LABELS[allowedRoles[1]]}`
+    const [first, ...rest] = allowedRoles
+    return `${ROLE_LABELS[first]}, ${rest
+      .slice(0, -1)
+      .map((role) => ROLE_LABELS[role])
+      .join(', ')} o ${ROLE_LABELS[rest[rest.length - 1]]}`
+  }, [allowedRoles])
 
   if (!isOpen) return null
 
@@ -46,13 +73,12 @@ export function AdminAuthModal({ isOpen, onClose, onSuccess }: AdminAuthModalPro
         headers: { Authorization: authHeader },
       })
 
-      if (meResponse.data.role !== 'ADMIN') {
-        setError('Solo los usuarios con rol Administrador pueden ingresar a este módulo.')
+      if (!allowedRoles.includes(meResponse.data.role)) {
+        setError(`Solo los usuarios con rol ${allowedLabel} pueden ingresar a este módulo.`)
         return
       }
 
-      axios.defaults.headers.common.Authorization = authHeader
-      onSuccess(meResponse.data)
+      onSuccess(meResponse.data, token)
     } catch (err) {
       setError('No se pudo iniciar sesión. Verifica las credenciales e inténtalo de nuevo.')
     } finally {
@@ -66,10 +92,11 @@ export function AdminAuthModal({ isOpen, onClose, onSuccess }: AdminAuthModalPro
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-emerald-400">Acceso restringido</p>
-            <h2 className="text-xl font-bold text-slate-50">Administrador</h2>
+            <h2 className="text-xl font-bold text-slate-50">{title}</h2>
             <p className="mt-1 text-sm text-slate-300">
-              Ingresa tus credenciales para confirmar que tienes permisos de administrador.
+              {description ?? 'Ingresa tus credenciales para continuar.'}
             </p>
+            <p className="mt-1 text-xs text-slate-400">Roles permitidos: {allowedLabel}</p>
           </div>
           <button
             className="text-slate-400 transition hover:text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
