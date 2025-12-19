@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { AgentState, Ticket } from '../types'
+import { AgentState, Ticket, User } from '../types'
 
-export function MatrizadorPage() {
+type MatrizadorPageProps = {
+  user: User | null
+}
+
+export function MatrizadorPage({ user }: MatrizadorPageProps) {
   const [state, setState] = useState<AgentState | null>(null)
   const [ticket, setTicket] = useState<Ticket | null>(null)
 
@@ -14,6 +18,8 @@ export function MatrizadorPage() {
   const badgeBase = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide'
 
   useEffect(() => {
+    if (!user) return
+
     const load = async () => {
       const res = await axios.get<AgentState>('/api/agents/me')
       setState(res.data)
@@ -23,10 +29,11 @@ export function MatrizadorPage() {
       }
     }
     load()
-  }, [])
+  }, [user])
 
   const takeNext = async () => {
-    const res = await axios.post<Ticket>(`/api/agents/${state?.user_id}/next`)
+    if (!state?.user_id) return
+    const res = await axios.post<Ticket>(`/api/agents/${state.user_id}/next`)
     setTicket(res.data)
     setState({ ...(state as AgentState), status: 'BUSY', current_ticket_id: res.data.id })
   }
@@ -38,6 +45,20 @@ export function MatrizadorPage() {
     setState({ ...(state as AgentState), status: 'FREE', current_ticket_id: undefined })
   }
 
+  if (!user) {
+    return (
+      <section id="matrizador" className="mx-auto max-w-5xl px-4 py-12">
+        <div className={`${cardClass} text-center`}>
+          <p className="text-sm uppercase tracking-wide text-emerald-400">Acceso restringido</p>
+          <h2 className="text-2xl font-bold">Inicia sesión para continuar</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Selecciona de nuevo el módulo Matrizador e ingresa tus credenciales para ver tus turnos asignados.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section id="matrizador" className="mx-auto max-w-5xl px-4 py-12">
       <div className={`${cardClass} grid gap-6 md:grid-cols-2`}>
@@ -47,6 +68,7 @@ export function MatrizadorPage() {
           <p className="mt-2 text-sm text-slate-300">
             Toma el siguiente turno de la cola de trámites. Cuando termines presiona “Fin de atención”.
           </p>
+          <p className="mt-2 text-sm text-slate-200">Sesión iniciada como {user.display_name} ({user.username}).</p>
           <div className="mt-4 flex items-center gap-3">
             <span
               className={
@@ -57,7 +79,11 @@ export function MatrizadorPage() {
             >
               {state?.status === 'BUSY' ? 'Ocupado' : 'Libre'}
             </span>
-            <button className={secondaryButton} onClick={takeNext} disabled={state?.status === 'BUSY'}>
+            <button
+              className={secondaryButton}
+              onClick={takeNext}
+              disabled={!state || state.status === 'BUSY'}
+            >
               Tomar siguiente turno
             </button>
             <button className={primaryButton} onClick={finish} disabled={!ticket}>
@@ -74,7 +100,12 @@ export function MatrizadorPage() {
               <p>Identificación: {ticket.client_identifier}</p>
               <p>Motivo: {ticket.motive}</p>
               <p>Tipo: {ticket.client_type}</p>
+              <p className="text-emerald-200">Atendido por: {user.display_name}</p>
             </div>
+          ) : state?.current_ticket_id ? (
+            <p className="mt-3 text-sm text-slate-400">
+              Cargando detalles del turno #{state.current_ticket_id}...
+            </p>
           ) : (
             <p className="mt-3 text-sm text-slate-400">No hay turno asignado.</p>
           )}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import axios from 'axios'
 import { ClientePage } from './pages/ClientePage'
 import { MatrizadorPage } from './pages/MatrizadorPage'
 import { AsesorPage } from './pages/AsesorPage'
@@ -9,38 +10,64 @@ import { NavBar } from './components/NavBar'
 import { AdminAuthModal } from './components/AdminAuthModal'
 import { ModuleKey, User } from './types'
 
-const moduleComponents: Record<ModuleKey, JSX.Element> = {
-  cliente: <ClientePage />,
-  matrizador: <MatrizadorPage />,
-  asesor: <AsesorPage />,
-  admin: <AdminPage />,
-  pantalla: <PantallaPage />,
-  test: <TestDbPage />,
-}
-
 function App() {
   const [selectedModule, setSelectedModule] = useState<ModuleKey | null>(null)
-  const [showAdminAuth, setShowAdminAuth] = useState(false)
-  const [adminUser, setAdminUser] = useState<User | null>(null)
-  const [pendingAdminModule, setPendingAdminModule] = useState<ModuleKey | null>(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingModule, setPendingModule] = useState<ModuleKey | null>(null)
+  const [allowedRoles, setAllowedRoles] = useState<User['role'][]>([])
+  const [authUser, setAuthUser] = useState<User | null>(null)
 
   const handleSelect = (module: ModuleKey | null) => {
-    const requiresAdmin = module && ['admin', 'test'].includes(module)
+    if (!module) {
+      setSelectedModule(null)
+      return
+    }
 
-    if (requiresAdmin && !adminUser) {
-      setPendingAdminModule(module)
-      setShowAdminAuth(true)
+    const authConfig: Partial<Record<ModuleKey, User['role'][]>> = {
+      admin: ['ADMIN'],
+      test: ['ADMIN'],
+      matrizador: ['ADMIN', 'MATRIZADOR', 'ASESOR'],
+    }
+
+    const requiresAuth = authConfig[module]
+
+    if (requiresAuth && (!authUser || !requiresAuth.includes(authUser.role))) {
+      setPendingModule(module)
+      setAllowedRoles(requiresAuth)
+      setShowAuthModal(true)
       return
     }
 
     setSelectedModule(module)
   }
 
-  const handleAdminSuccess = (user: User) => {
-    setAdminUser(user)
-    setSelectedModule(pendingAdminModule ?? 'admin')
-    setPendingAdminModule(null)
-    setShowAdminAuth(false)
+  const handleAuthSuccess = (user: User, token: string) => {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`
+    setAuthUser(user)
+    setSelectedModule(pendingModule ?? 'admin')
+    setPendingModule(null)
+    setShowAuthModal(false)
+  }
+
+  const renderSelectedModule = () => {
+    if (!selectedModule) return null
+
+    switch (selectedModule) {
+      case 'cliente':
+        return <ClientePage />
+      case 'matrizador':
+        return <MatrizadorPage user={authUser} />
+      case 'asesor':
+        return <AsesorPage />
+      case 'admin':
+        return <AdminPage />
+      case 'pantalla':
+        return <PantallaPage />
+      case 'test':
+        return <TestDbPage />
+      default:
+        return null
+    }
   }
 
   return (
@@ -48,7 +75,7 @@ function App() {
       <NavBar onSelect={handleSelect} selected={selectedModule} />
       <main className="flex flex-col items-center px-4 pb-16">
         {selectedModule ? (
-          <div className="w-full">{moduleComponents[selectedModule]}</div>
+          <div className="w-full">{renderSelectedModule()}</div>
         ) : (
           <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-10 py-16 text-center">
             <div className="space-y-4">
@@ -86,12 +113,19 @@ function App() {
         )}
       </main>
       <AdminAuthModal
-        isOpen={showAdminAuth}
+        isOpen={showAuthModal}
+        allowedRoles={allowedRoles}
+        title={pendingModule === 'matrizador' ? 'Ingreso a módulo Matrizador' : 'Administrador'}
+        description={
+          pendingModule === 'matrizador'
+            ? 'Ingresa tus credenciales para continuar con el módulo Matrizador.'
+            : 'Ingresa tus credenciales para confirmar que tienes permisos de administrador.'
+        }
         onClose={() => {
-          setShowAdminAuth(false)
-          setPendingAdminModule(null)
+          setShowAuthModal(false)
+          setPendingModule(null)
         }}
-        onSuccess={handleAdminSuccess}
+        onSuccess={handleAuthSuccess}
       />
     </div>
   )
