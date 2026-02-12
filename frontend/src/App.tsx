@@ -6,6 +6,7 @@ import { AsesorPage } from './pages/AsesorPage'
 import { AdminPage } from './pages/AdminPage'
 import { PantallaPage } from './pages/PantallaPage'
 import { TestDbPage } from './pages/TestDbPage'
+import { UafePage } from './pages/UafePage'
 import { NavBar } from './components/NavBar'
 import { AdminAuthModal } from './components/AdminAuthModal'
 import { ModuleKey, User } from './types'
@@ -64,7 +65,7 @@ function App() {
       case 'pantalla':
         return <PantallaPage />
       case 'uafe':
-        return <section className="mx-auto max-w-3xl py-16 text-center text-slate-200">Módulo UAFE en construcción.</section>
+        return <UafePage />
       case 'test':
         return <TestDbPage />
       default:
