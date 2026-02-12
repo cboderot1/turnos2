@@ -63,6 +63,8 @@ function App() {
         return <AdminPage />
       case 'pantalla':
         return <PantallaPage />
+      case 'uafe':
+        return <section className="mx-auto max-w-3xl py-16 text-center text-slate-200">Módulo UAFE en construcción.</section>
       case 'test':
         return <TestDbPage />
       default:
