@@ -19,6 +19,7 @@ const links: NavLink[] = [
   { key: 'asesor', label: 'Asesor' },
   { key: 'admin', label: 'Administrador' },
   { key: 'pantalla', label: 'Pantalla' },
+  { key: 'reportes', label: 'Reportes' },
   { key: 'uafe', label: 'UAFE' },
   { key: 'test', label: 'Test DB' },
 ]

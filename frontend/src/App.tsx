@@ -7,6 +7,7 @@ import { AdminPage } from './pages/AdminPage'
 import { PantallaPage } from './pages/PantallaPage'
 import { TestDbPage } from './pages/TestDbPage'
 import { UafePage } from './pages/UafePage'
+import { ReportesPage } from './pages/ReportesPage'
 import { NavBar } from './components/NavBar'
 import { AdminAuthModal } from './components/AdminAuthModal'
 import { ModuleKey, User } from './types'
@@ -64,6 +65,8 @@ function App() {
         return <AdminPage />
       case 'pantalla':
         return <PantallaPage />
+      case 'reportes':
+        return <ReportesPage />
       case 'uafe':
         return <UafePage />
       case 'test':
