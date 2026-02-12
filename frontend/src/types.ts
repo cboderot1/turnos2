@@ -43,7 +43,15 @@ export type AgentSummary = {
   current_ticket_id?: number | null
 }
 
-export type ModuleKey = 'cliente' | 'matrizador' | 'asesor' | 'admin' | 'pantalla' | 'uafe' | 'test'
+export type ModuleKey =
+  | 'cliente'
+  | 'matrizador'
+  | 'asesor'
+  | 'admin'
+  | 'pantalla'
+  | 'reportes'
+  | 'uafe'
+  | 'test'
 
 export type UserListItem = {
   id: number
